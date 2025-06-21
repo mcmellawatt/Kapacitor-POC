@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=test
+      - INFLUXDB_HTTP_AUTH_ENABLED=false
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+
+  kapacitor:
+    image: kapacitor:latest
+    ports:
+      - "9092:9092"
+    environment:
+      - KAPACITOR_HOSTNAME=kapacitor
+      - KAPACITOR_HTTP_BIND_ADDRESS=:9092
+    depends_on:
+      - influxdb
+    volumes:
+      - kapacitor_data:/var/lib/kapacitor
+      - ./kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
+
+volumes:
+  kapacitor_data:
+  influxdb_data:

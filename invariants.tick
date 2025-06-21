@@ -1,0 +1,29 @@
+// Invariant 1: The 'value' field must always be increasing for a stream of points.
+// Only check stream='monotonicity_violation'
+batch
+    |query('SELECT value FROM "testdb"."autogen"."test" WHERE "stream" = \'monotonicity_violation\'')
+        .period(10m)
+        .every(1s)
+        .groupBy([])
+    |difference('value')
+        .as('diff')
+    |httpOut('diff_inspect')
+    |alert()
+        .crit(lambda: "diff" < 0)
+        .details('monotonicity violation')
+        .post('http://host.docker.internal:9001/kapacitor-alert')
+
+// Invariant 2: No value should be negative.
+// Only check stream='nonnegative_violation'
+batch
+    |query('SELECT value FROM "testdb"."autogen"."test" WHERE "stream" = \'nonnegative_violation\' ORDER BY time')
+        .period(10m)
+        .every(1s)
+        .groupBy([])
+    |eval(lambda: "value")
+        .as('val')
+    |alert()
+        .crit(lambda: "val" < 0)
+        .details('non-negative violation')
+        .log('/tmp/negative_value_violation.log')
+        .post('http://host.docker.internal:9001/kapacitor-alert')

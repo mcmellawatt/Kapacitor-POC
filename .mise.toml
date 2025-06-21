@@ -1,0 +1,9 @@
+[tasks]
+run-poc = [
+  "docker compose down -v",
+  "docker compose up -d --wait",
+  "until curl -sf http://localhost:9092/kapacitor/v1/ping; do sleep 1; done",
+  "docker exec kapacitor-poc-influxdb-1 influx -execute 'DROP DATABASE testdb'",
+  "docker exec kapacitor-poc-influxdb-1 influx -execute 'CREATE DATABASE testdb'",
+  "go run ./cmd/main.go"
+]
