@@ -19,7 +19,6 @@ var (
 )
 
 func main() {
-	// Start HTTP server for Kapacitor alerts
 	go func() {
 		http.HandleFunc("/kapacitor-alert", kapacitorAlertHandler)
 		log.Fatal(http.ListenAndServe("0.0.0.0:9001", nil))
@@ -44,7 +43,6 @@ func main() {
 		valueFunc: func(i int) float64 { return float64(i - 5) },
 	})
 
-	// Now create the Kapacitor task
 	cli, err := client.New(client.Config{URL: "http://localhost:9092"})
 	if err != nil {
 		log.Fatalf("Kapacitor client error: %v", err)
@@ -59,7 +57,6 @@ func main() {
 	}
 	tickScript := string(tickScriptBytes)
 
-	// Upload the invariant TICKscript as a Kapacitor batch task
 	taskOpts := client.CreateTaskOptions{
 		ID:         "invariant-check",
 		Type:       client.BatchTask,
@@ -80,7 +77,6 @@ func main() {
 	select {}
 }
 
-// Write a point to InfluxDB with a stream tag
 func writeToInflux(points []map[string]interface{}, measurement, streamTag string) error {
 	influxURL := "http://localhost:8086/write?db=testdb"
 	for _, point := range points {
@@ -125,7 +121,6 @@ func kapacitorAlertHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// Helper to generate and write a stream to InfluxDB
 type streamSpec struct {
 	name      string
 	tag       string
