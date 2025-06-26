@@ -23,6 +23,18 @@ services:
       - kapacitor_data:/var/lib/kapacitor
       - ./kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
 
+  cronograf:
+    image: chronograf:latest
+    ports:
+      - "8888:8888"
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+    depends_on:
+      - influxdb
+    links:
+      - influxdb
+    restart: unless-stopped
+
 volumes:
   kapacitor_data:
   influxdb_data:
